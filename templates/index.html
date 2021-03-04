@@ -36,11 +36,13 @@
 </nav>
   <div class="container-fluid col-8 text-center">
     <h1>{{ page_title }}</h1>
+    <h3>User: {{ user }}</h3>
   </div>
 
    {% block contents %}
-   <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae maiores qui, unde iste vitae possimus adipisci
-      modi distinctio deleniti ut hic aliquam quia nihil eos cum ad voluptate totam libero!</p>
+   <a href="{% url 'login' %}">Login</a>
+   <br>
+   <a href="{% url 'register' %}">Register</a>
    {% endblock contents %}
    
 <script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>

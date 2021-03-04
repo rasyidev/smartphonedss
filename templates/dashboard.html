@@ -1,0 +1,6 @@
+{% extends 'index.html' %}
+
+{% block contents %}
+<h1>Welcome to the dashboard page, {{ user }}</h1>
+<a href="{% url 'logout' %}">Logout</a>
+{% endblock contents %}
