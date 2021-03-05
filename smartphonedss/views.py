@@ -1,22 +1,23 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
 
 def index(request):
    return render(request, 'index.html')
 
 def user_login(request):
-   print(request.method)
-   if (request.method=='POST'):
+   if request.method=='POST':
       password= request.POST['password']
       username= request.POST['username']
       user = authenticate(request, username=username, password=password)
       if(user is not None):
          login(request, user)
-         return redirect('dashboard')
+         return redirect('dashboard:index')
       else:
          return redirect('login')
 
+   elif request.method == 'GET':
+      if request.user.is_authenticated:
+         return redirect('dashboard:index')
 
    context = {
       'page_title': "Halaman Login",
@@ -88,14 +89,3 @@ def register_success(request):
       'page_title': "Berhasil Register"
    }
    return render(request, 'register-success.html', context)
-
-
-def dashboard(request):
-   context = {
-      'page_title': "Dashboard"
-   }
-   return render(request, 'dashboard.html', context)
-
-def user_logout(request):
-   logout(request)
-   return redirect('/')

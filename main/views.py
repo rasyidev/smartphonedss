@@ -1,11 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
+# @login_required
 def index(request):
-   return render(request, 'main/index.html')
+   context = {
+      'page_title': "Dashboard"
+   }
+   return  render(request, 'dashboard.html', context)
 
-def register(request):
-   return render(request, 'main/register.html')
-
-def login(request):
-   pass
+# @login_required
+def user_logout(request):
+   logout(request)
+   return redirect('/')
