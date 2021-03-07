@@ -1,6 +1,8 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 
+from . import ahp_logic
+
 def index(request):
    return render(request, 'index.html')
 
@@ -50,7 +52,17 @@ def register_preference(request):
       memory_vs_battery = form_result['memory_vs_battery']
       memory_vs_reputation = form_result['memory_vs_reputation']
       battery_vs_reputation = form_result['battery_vs_reputation']
-
+      
+      apapun = dict(form_result.copy())
+      apapun.pop('csrfmiddlewaretoken')
+      print(apapun)
+      ahp = ahp_logic.AHP(apapun, 6)
+      # print("Object in AHP:", ahp.obj)
+      print(ahp.is_consistent())
+      if ahp.is_consistent():
+         return redirect('register_success')
+      else:
+         return redirect('register_preference')
 
    range_value = list(range(-9,10))
    range_value.remove(-1)
@@ -72,8 +84,8 @@ def register_preference(request):
       {'name': 'memory_vs_battery', 'left':'Kapasitas Memori Internal', 'right':'Kapasitas Baterai'},
       {'name': 'memory_vs_reputation', 'left':'Kapasitas Memori Internal', 'right':'Reputasi Produk'},
       {'name': 'battery_vs_reputation', 'left':'Kapasitas Memori Internal', 'right':'Reputasi Produk'},
-      {'name': 'ram_vs_cpu', 'left':'RAM', 'right':'CPU'},
-      {'name': 'rating_vs_sold', 'left':'Rating', 'right':'Jumlah Produk Terjual'}
+      # {'name': 'ram_vs_cpu', 'left':'RAM', 'right':'CPU'},
+      # {'name': 'rating_vs_sold', 'left':'Rating', 'right':'Jumlah Produk Terjual'}
    ]
 
    context = {
