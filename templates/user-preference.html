@@ -1,0 +1,22 @@
+{% extends 'index.html' %}
+
+{% block contents %}
+<table class="table table-striped">
+<thead>
+   <th>Performa</th>
+   <th>Harga</th>
+   <th>Kamera</th>
+   <th>Kapasitas Memori Internal</th>
+   <th>Kapasitas Baterai</th>
+   <th>Reputasi Produk</th>
+</thead>
+<tbody>
+   <td>{{preferences.performance}}</td>
+   <td>{{preferences.price}}</td>
+   <td>{{preferences.camera}}</td>
+   <td>{{preferences.memory}}</td>
+   <td>{{preferences.battery}}</td>
+   <td>{{preferences.reputation}}</td>
+{% comment %} </tbody>
+</table>{{ preferences.camera }} {% endcomment %}
+{% endblock contents %}

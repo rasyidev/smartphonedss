@@ -26,3 +26,18 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
    def __str__(self):
       return self.email
+
+class UserPreference(models.Model):
+   user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+   performance = models.FloatField()
+   price = models.FloatField()
+   camera = models.FloatField()
+   memory = models.FloatField()
+   battery = models.FloatField()
+   reputation = models.FloatField()
+   is_choosen = models.BooleanField(default=True)
+
+   def __str__(self):
+       return f'{self.user}'
+   
+    

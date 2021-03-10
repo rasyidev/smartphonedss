@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
+from main.models import CustomUser, UserPreference
 
 from . import ahp_logic
 
@@ -8,9 +9,9 @@ def index(request):
 
 def user_login(request):
    if request.method=='POST':
+      email= request.POST['email']
       password= request.POST['password']
-      username= request.POST['username']
-      user = authenticate(request, username=username, password=password)
+      user = authenticate(request, email=email, password=password)
       if(user is not None):
          login(request, user)
          return redirect('dashboard:index')
@@ -27,12 +28,25 @@ def user_login(request):
    return render(request, 'login.html', context)
 
 def user_register(request):
+   if request.method == 'POST':
+      email = request.POST['email']
+      password = request.POST['password']
+      repassword = request.POST['repassword']
+      if password == repassword:
+         new_user = CustomUser.objects.create_user(email= email, password=password)
+         return redirect('login')
+      else:
+         return redirect('register')
+
    context = {
       'page_title': "Halaman Register",
    }
    return render(request, 'register.html', context)
 
 def register_preference(request):
+   # print(request.user.id)
+   # print(UserPreference.objects.all()[0].__dict__)
+   print(UserPreference.objects.get(user_id=request.user.id).__dict__)
    form_result = None
    if request.method == "POST":
       form_result = request.POST or None
@@ -60,6 +74,10 @@ def register_preference(request):
       # print("Object in AHP:", ahp.obj)
       print(ahp.is_consistent())
       if ahp.is_consistent():
+         # new_preference = UserPreference.objects.get(user_id=request.user.id)
+         cw = ahp.get_criteria_weight()
+         UserPreference.objects.create(user=CustomUser.objects.get(id=request.user.id), performance=cw[0], price=cw[1], camera=cw[2], memory=cw[3], battery=cw[4], reputation=cw[5])
+
          return redirect('register_success')
       else:
          return redirect('register_preference')
