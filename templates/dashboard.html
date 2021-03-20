@@ -1,6 +1,66 @@
 {% extends 'index.html' %}
+{% load dashboard_extras %}
+
+{% block navbar_user %}
+<li class="nav-item dropdown">
+   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown"
+      aria-expanded="false">
+      {{ user|only_username }}
+   </a>
+   <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+      <li><a class="dropdown-item" href="{% url 'dashboard:profile' %}">Profile</a></li>
+      <li><a class="dropdown-item" href="{% url 'dashboard:logout' %}">Logout</a></li>
+   </ul>
+</li>
+{% endblock navbar_user %}
 
 {% block contents %}
-<h1>Welcome to the dashboard page, {{ user }}</h1>
-<a href="{% url 'dashboard:logout' %}">Logout</a>
+{% if preference_empty %}
+<div class="alert alert-danger" role="alert">
+  <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
+  <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
+  <hr>
+  <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi smartphone</a></p>
+</div>
+{% endif %}
+
+{% if not preference_empty %}
+<div class="container-fluid col-sm-8 col-md-6">
+   <form action="" method="post">
+      {% csrf_token %}
+      <div class="row">
+         <div class="form-group col-8">
+            <input type="searchbar" class="form-control" name="searchbar" id="searchbar"
+               aria-describedby="searchbarHelpId" placeholder="Cari nama smartphone">
+         </div>
+         <button type="submit" class="btn btn-primary mt-2 col-4 mt-0">Search</button>
+      </div>
+   </form>
+</div>
+{% endif %}
+<canvas id="myChart"></canvas>
+<script>
+var ctx = document.getElementById('myChart').getContext('2d');
+var chart = new Chart(ctx, {
+    // The type of chart we want to create
+    type: 'line',
+
+    // The data for our dataset
+    data: {
+        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
+        datasets: [{
+            label: 'My First dataset',
+            backgroundColor: 'rgb(255, 99, 132)',
+            borderColor: 'rgb(255, 99, 132)',
+            data: [0, 10, 5, 2, 20, 30, 45]
+        }]
+    },
+
+    // Configuration options go here
+    options: {}
+});
+</script>
 {% endblock contents %}
+
+{% block js_extras %}
+{% endblock js_extras %}

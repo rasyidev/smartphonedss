@@ -1,0 +1,78 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% load dashboard_extras %}
+
+{% block header_extras %}
+<script src="{% static 'vendor/chartjs/Chart.min.js' %}"></script>
+{% endblock header_extras %}
+
+{% block contents %}
+{% if preference_empty %}
+<div class="alert alert-danger" role="alert">
+  <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
+  <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
+  <hr>
+  <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi smartphone</a></p>
+</div>
+{% endif %}
+
+{% if not preference_empty %}
+<div class="row col-12 mx-5 d-flex">
+   <div class="card col-md-6">
+      <div class="card-body">
+         <h5 class="card-title text-center">Preferensi Saya</h5>
+         <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's
+         <canvas id="myChart"></canvas>
+            content.</p>
+         <a href="{% url 'dashboard:register_preference' %}" class="btn btn-warning">Update preferensi</a>
+      </div>
+   </div>
+</div>
+{% endif %}
+
+<script>
+var ctx = document.getElementById('myChart').getContext('2d');
+data = {
+    datasets: [{
+        data: [
+         {{ preferences.performance }}, 
+         {{ preferences.memory }},
+         {{ preferences.camera }},
+         {{ preferences.battery }},
+         {{ preferences.reputation }},
+         {{ preferences.price }},
+        ],
+         backgroundColor: [
+         "red",
+         "grey",
+         "green",
+         "blue",
+         "yellow",
+         "coral",
+      ]
+    }],
+
+    // These labels appear in the legend and in the tooltips when hovering different arcs
+    labels: [
+         "Performa",
+         "Memori Internal",
+         "Kamera",
+         "Kapasitas Baterai",
+         "Reputasi Produk",
+         "Harga"
+    ],
+    options: {}
+};
+var myPieChart = new Chart(ctx, {
+    type: 'pie',
+    data: data,
+    options: data.options
+});
+
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+{% endblock contents %}
+
+{% block js_extras %}
+{% endblock js_extras %}

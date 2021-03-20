@@ -2,10 +2,13 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate
 from main.models import CustomUser, UserPreference
 
-from . import ahp_logic
+# from . import ahp_logic
 
 def index(request):
-   return render(request, 'index.html')
+   context = {
+      'page_title': "Landing Page"
+   }
+   return render(request, 'index.html', context)
 
 def user_login(request):
    if request.method=='POST':

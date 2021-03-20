@@ -34,12 +34,12 @@ class AHP:
          value = int(result_object[item]['value'][0])
          # print('a', addr, result_object[item]['value'][0])
          if value > 0:
-               pcm[addr] = value
-               pcm[mirror_addr] = 1/value
+               pcm[addr] = 1/value
+               pcm[mirror_addr] = value
          else:
                value = value * -1
-               pcm[mirror_addr] = value
-               pcm[addr] = 1/value
+               pcm[mirror_addr] = 1/value
+               pcm[addr] = value
       return pcm
     
     def get_normalized_pcm(self):
@@ -59,7 +59,8 @@ class AHP:
         normalized_pcm_row_avg = []
         for i in range(self.criteria_count):
             normalized_pcm_row_avg.append(sum(normalized_pcm[i])/self.criteria_count)
-        return normalized_pcm_row_avg
+        result = [round(x * 100, 2) for x in normalized_pcm_row_avg]
+        return result
     
     def generate_cr_matrix(self):
         pcm = self.create_pcm()
