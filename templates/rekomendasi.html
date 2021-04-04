@@ -1,0 +1,25 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+
+{% block contents %}
+<table class="table">
+   <thead>
+      <tr>
+         <td>Nama</td>
+         <td>url</td>
+         <td>Harga</td>
+         <td>Reputasi</td>
+      </tr>
+   </thead>
+   <tbody>
+   {% for product in products %}
+      <tr>
+         <td>{{ product}}</td>
+         <td><a href="{{ product.product_url }}">link</a></td>
+         <td>Rp.{{ product.price }}</td>
+         <td>{{ product.rank }}</td>
+      </tr>
+   {% endfor %}
+   </tbody>
+</table>
+{% endblock contents %}

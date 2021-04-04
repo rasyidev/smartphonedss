@@ -17,48 +17,97 @@
 {% block contents %}
 {% if preference_empty %}
 <div class="alert alert-danger" role="alert">
-  <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
-  <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
-  <hr>
-  <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi smartphone</a></p>
+   <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
+   <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
+   <hr>
+   <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi
+         smartphone</a></p>
 </div>
 {% endif %}
 
 {% if not preference_empty %}
-<div class="container-fluid col-sm-8 col-md-6">
-   <form action="" method="post">
-      {% csrf_token %}
-      <div class="row">
-         <div class="form-group col-8">
-            <input type="searchbar" class="form-control" name="searchbar" id="searchbar"
-               aria-describedby="searchbarHelpId" placeholder="Cari nama smartphone">
+<div class="container-fluid col-sm-10 mb-3">
+   <div class="row">
+      <form action="" method="post">
+         {% csrf_token %}
+         <div class="row d-flex">
+            <div class="form-group col-8 align-center">
+               <input type="searchbar" class="form-control" name="searchbar" id="searchbar"
+                  aria-describedby="searchbarHelpId" placeholder="Cari nama smartphone">
+            </div>
+            <button type="submit" class="btn btn-search btn-primary col-4 mt-0">Search</button>
          </div>
-         <button type="submit" class="btn btn-primary mt-2 col-4 mt-0">Search</button>
-      </div>
-   </form>
+      </form>
+   </div>
 </div>
 {% endif %}
+<div class="container-fluid col-12 text-center d-flex">
+   <div class="row justify-content-center px-3" id="items-container">
+      {% for smartphone in smartphones %}
+      <div class="card col-5 col-sm-3 col-md-2 m-0 p-3">
+         <img src="{{ smartphone.img_url }}" class="card-img-top" alt="...">
+         <div class="card-body">
+            <h5 class="card-title">{{ smartphone.name }}</h5>
+            <p class="card-text">RAM {{ smartphone.ram }} GB | Storage {{ smartphone.storage }} GB</p>
+            <a href="{{ smartphone.url }}" class="btn btn-primary">Lihat Detail</a>
+            <a href="{% url 'dashboard:insert_to_cart' %}?smartphone_id={{ smartphone.id }}">Insert To Cart</a>
+         </div>
+      </div>
+      {% endfor %}
+   </div>
+</div>
+
 <canvas id="myChart"></canvas>
+
 <script>
-var ctx = document.getElementById('myChart').getContext('2d');
-var chart = new Chart(ctx, {
-    // The type of chart we want to create
-    type: 'line',
+   var searchbar = document.getElementById("searchbar");
+   var itemsContainer = document.getElementById("items-container");
+   searchbar.addEventListener('keyup', function(){
+      var xhr = new XMLHttpRequest() 
+      xhr.onreadystatechange = function(){
+         console.log("State is ready!")
+         if(xhr.readyState == 4 && xhr.status == 200){
+            {% comment %} console.log("AJAX READY"); {% endcomment %}
+            var data = JSON.parse(xhr.responseText)["smartphones"]
+            var smartphones = JSON.parse(data)
+            if(smartphones.length == 0){
+               itemsContainer.innerHTML = "Data smartphone tidak ditemukan";
+            }else{
+               console.log(smartphones[0])
+               text = ""
+               smartphones.forEach(obj => {
+                  text += `<div class="card col-5 col-sm-3 col-md-2 m-0 p-3">
+                              <img src="${obj.fields.img_url}" class="card-img-top" alt="...">
+                              <div class="card-body">
+                                 <h5 class="card-title">${obj.fields.name}</h5>
+                                 <p class="card-text">RAM ${obj.fields.ram} GB | Storage ${obj.fields.storage} GB</p>
+                                 <a href="${obj.fields.url}" class="btn btn-primary">Lihat Detail</a>
+                                 <a href="{% url 'dashboard:insert_to_cart' %}?smartphone_id=${obj.pk}">Insert To Cart</a>
+                              </div>
+                           </div>`
+               })
+               itemsContainer.innerHTML = text
+            }
+         }
+      }
+      xhr.open('GET', 'http://localhost:8000/dashboard/get_smartphones?search_key=' + searchbar.value, true);
+      xhr.send();
+   });
 
-    // The data for our dataset
-    data: {
-        labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-        datasets: [{
-            label: 'My First dataset',
-            backgroundColor: 'rgb(255, 99, 132)',
-            borderColor: 'rgb(255, 99, 132)',
-            data: [0, 10, 5, 2, 20, 30, 45]
-        }]
-    },
+   {% comment %} addToCartBtns = document.querySelectorAll(".btn-insert-to-cart");
+   addToCartBtns.forEach(function callback(value, index){
+      addToCartBtns[index].addEventListener('click', function(){
+         var xhr = new XMLHttpRequest()
+         console.log(xhr.onreadystatechange);
+         xhr.onreadystatechange = function(){
+            if( xhr.readyState == 4 && xhr.status == 200 ){
+               console.log("XHR Ready")
+            }
+         }
+         console.log(addToCartBtns[index].getAttribute("data-smartphone-id"))
+      });
+    }); {% endcomment %}
 
-    // Configuration options go here
-    options: {}
-});
 </script>
 {% endblock contents %}
 

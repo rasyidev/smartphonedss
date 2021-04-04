@@ -40,4 +40,45 @@ class UserPreference(models.Model):
    def __str__(self):
        return f'{self.user}'
    
-    
+class Smartphone(models.Model):
+   name = models.CharField(max_length=255, unique=True)
+   ram = models.FloatField()
+   cpu = models.FloatField()
+   storage = models.FloatField()
+   battery = models.FloatField()
+   url = models.CharField(max_length=255)
+   img_url = models.CharField(max_length=255)
+   main_cam = models.FloatField()
+   selfie_cam = models.FloatField()
+
+   def __str__(self):
+       return self.name
+   
+
+   # price, sold amount, rating
+   
+class Product(models.Model):
+   # pass
+   smartphone_model = models.ForeignKey(Smartphone, on_delete=models.CASCADE)
+   seller = models.CharField(max_length=255)
+   rank = models.IntegerField()
+   price = models.IntegerField()
+   product_url = models.TextField()
+
+   def __str__(self):
+       return self.smartphone_model.name
+
+class Cart(models.Model):
+   user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+   do_recommendation = models.BooleanField(default=False)
+
+class SmartphoneCart(models.Model):
+   cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
+   smartphone = models.ForeignKey(Smartphone, on_delete=models.CASCADE)
+
+class Recomendation(models.Model):
+   smartphone_cart = models.ForeignKey(SmartphoneCart, on_delete=models.CASCADE)
+
+class ProductRecommendation(models.Model):
+   recommendation = models.ForeignKey(Recomendation, on_delete=models.CASCADE)
+   product = models.ForeignKey(Product, on_delete=models.CASCADE)

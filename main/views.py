@@ -1,22 +1,37 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse, HttpResponse
+from django.core import serializers
+from django.db.models.functions import Lower
 
 from . import ahp_logic
-from .models import UserPreference, CustomUser
+from .models import UserPreference, CustomUser, Smartphone, Product, Cart, SmartphoneCart, ProductRecommendation
 
 # Create your views here.
 # @login_required
 def index(request):
+   smartphones = Smartphone.objects.all().order_by('name')
+   if request.method == "POST":
+      searchkey = request.POST['searchbar'].lower()
+      s = Smartphone.objects.annotate(lower_name=Lower('name'))
+      smartphones = s.filter(lower_name__contains = searchkey)
+   
+   for smartphone in smartphones:
+      # print(smartphone.id)
+      product = Product.objects.filter(smartphone_model_id=smartphone.id)
+      # smartphones['stock'] = len(product)
+
    preferences = UserPreference.objects.filter(user_id=request.user.id)
    preference_empty = None
    if len(preferences) == 0:
-      print("Smartphone Preference not registered yet!")
+      print("Smartphone Preference is not registered yet!")
       preference_empty = True
    else:
       preference_empty = False
 
    context = {
+      'smartphones': smartphones,
       'page_title': "Dashboard",
       'preference_empty': preference_empty,
    }
@@ -39,6 +54,11 @@ def user_preferences(request):
 def profile(request):
    user = request.user
    preferences = UserPreference.objects.filter(user_id=user.id)
+   cart = Cart.objects.filter(user_id=user.id, do_recommendation=False)[0]
+   smartphone_objects = SmartphoneCart.objects.filter(cart_id=cart.id)
+   smartphones = []
+   for x in smartphone_objects:
+      smartphones.append(Smartphone.objects.get(id=x.smartphone_id))
    preference_empty = None
    if len(preferences) == 0:
       print("Smartphone Preference not registered yet!")
@@ -49,7 +69,8 @@ def profile(request):
    context = {
       'preference_empty': preference_empty,
       'page_title': "User Profile",
-      'preferences': preferences
+      'preferences': preferences,
+      'smartphones': smartphones,
    }
    return render(request, 'profile.html', context)
 
@@ -130,3 +151,126 @@ def register_preference(request):
       'page_title': "Register Preferensi Pengguna"
    }
    return render(request, 'register-preference.html', context)
+
+def get_smartphones(request):
+   smartphones = Smartphone.objects.all()
+   
+   data = {}
+   if request.method == "GET":
+      # tanpa pencarian 
+      if len(request.GET) > 0:
+         search_key= request.GET['search_key']
+         s = Smartphone.objects.annotate(lower_name=Lower('name'))
+         smartphones = s.filter(lower_name__contains=search_key)
+         smartphones = serializers.serialize('json', smartphones)
+         # print(smartphones)
+         data = {
+            'smartphones': smartphones
+         }
+         
+   return JsonResponse(data)
+
+def insert_to_cart(request):
+   response = ""
+   # if request get data exist
+   if len(request.GET) > 0:
+      smartphone_id = request.GET['smartphone_id']
+      smartphone = Smartphone.objects.get(id=smartphone_id)
+      user_id = request.user.id
+      # print("User id:", user_id)
+
+      # user have no cart -> create one
+      if len(Cart.objects.filter(user_id=user_id, do_recommendation=False)) < 1:
+         print("User have no cart")
+         Cart.objects.create(user_id=user_id, do_recommendation=False)
+         cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
+
+         #check if smartphone is already exist in SmartphoneCart
+         already_exist = False
+         if len(SmartphoneCart.objects.filter(cart_id=cart.id, smartphone_id=smartphone.id)) > 0:
+            already_exist = True
+         
+         if already_exist is False:
+            SmartphoneCart.objects.create(cart_id=cart.id, smartphone_id=smartphone_id)
+            response = f"Berhasil menambahkan data {smartphone.name}"
+         else:
+            response = "Smartphone sudah ada di dalam keranjang"
+
+      # else (user have cart)
+      else:
+         print("User already have a cart")
+         cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
+
+         #check if smartphone is already exist in SmartphoneCart
+         already_exist = False
+         if len(SmartphoneCart.objects.filter(cart_id=cart.id, smartphone_id=smartphone.id)) > 0:
+            already_exist = True
+
+         if already_exist is False:
+            SmartphoneCart.objects.create(cart_id=cart.id, smartphone_id=smartphone_id)
+            response = f"Berhasil menambahkan data {smartphone.name}"
+         else:
+            response = "Smartphone sudah ada di dalam keranjang"
+
+      
+   else:
+      response = "Gagal menambahkan data smartphone"
+
+   return redirect('dashboard:index')
+
+def remove_from_cart(request):
+   response = ""
+   # if request get data exist
+   if len(request.GET) > 0:
+      smartphone_id = request.GET['smartphone_id']
+      user_id = request.user.id
+      cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
+      smartphonecart = SmartphoneCart.objects.filter(cart_id=cart.id)
+      smartphone_tobe_removed = SmartphoneCart.objects.get(smartphone_id=smartphone_id)
+      smartphone_name = Smartphone.objects.get(id=smartphone_id).name
+      # print(smartphone_tobe_removed.__dict__)
+      smartphone_tobe_removed.delete()
+      response = f"{smartphone_name} has removed from your cart!"
+      return redirect('dashboard:profile')
+
+   else:
+      response = "No data to be removed!"
+   return HttpResponse(response)
+   # return redirect('dashboard:profile')
+
+def rekomendasi(request):
+   user_id = request.user.id
+   cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
+   smartphonecart = SmartphoneCart.objects.filter(cart_id=cart.id)
+   smartphone_ids = []
+   for smartphone in smartphonecart:
+      smartphone_ids.append(smartphone.smartphone_id)
+   print("smartphone ids:", smartphone_ids)
+
+   products = Product.objects.filter(smartphone_model_id__in=smartphone_ids)
+   p = Preference.objects.get(user_id=user_id)
+   data = []
+   for product in products:
+      smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
+      obj = {}
+      obj['product_name'] = smartphone.name
+      obj['ram'] = smartphone.ram
+      obj['storage'] = smartphone.storage
+      obj['cpu'] = smartphone.cpu
+      obj['battery'] = smartphone.battery
+      obj['main_cam'] = smartphone.main_cam
+      obj['selfie_cam'] = smartphone.selfie_cam
+      obj['price'] = product.price
+      obj['rank'] = product.rank
+      obj['score'] = (
+         smartphone.ram**(0.5*p.performance) 
+      )
+      obj['product_url'] = product.product_url
+      data.append(obj)
+   print(data[0])
+   context = {
+      'page_title': "Rekomendasi",
+      'products': products
+   }
+
+   return render(request, 'rekomendasi.html', context)
