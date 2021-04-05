@@ -245,10 +245,11 @@ def rekomendasi(request):
    smartphone_ids = []
    for smartphone in smartphonecart:
       smartphone_ids.append(smartphone.smartphone_id)
-   print("smartphone ids:", smartphone_ids)
+   # print("smartphone ids:", smartphone_ids)
 
    products = Product.objects.filter(smartphone_model_id__in=smartphone_ids)
-   p = Preference.objects.get(user_id=user_id)
+   p = UserPreference.objects.get(user_id=user_id)
+   print("User preferences:", p.__dict__)
    data = []
    for product in products:
       smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
@@ -262,15 +263,54 @@ def rekomendasi(request):
       obj['selfie_cam'] = smartphone.selfie_cam
       obj['price'] = product.price
       obj['rank'] = product.rank
-      obj['score'] = (
-         smartphone.ram**(0.5*p.performance) 
-      )
+      obj['score'] = 0
       obj['product_url'] = product.product_url
       data.append(obj)
-   print(data[0])
+
+   normalized_data = []
+   max_ram =max(x['ram'] for x in data)
+   max_storage =max(x['storage'] for x in data)
+   max_cpu =max(x['cpu'] for x in data)
+   max_battery =max(x['battery'] for x in data)
+   max_main_cam =max(x['main_cam'] for x in data)
+   max_selfie_cam =max(x['selfie_cam'] for x in data)
+   min_price = min(x['price'] for x in data)
+   min_rank = min(x['rank'] for x in data)
+
+   for product in data:
+      obj = {}
+      obj['product_name'] = product['product_name']
+      obj['ram'] = product['ram'] / max_ram
+      obj['storage'] = product['storage'] / max_storage
+      obj['cpu'] = product['cpu'] / max_cpu
+      obj['battery'] = product['battery'] / max_battery
+      obj['main_cam'] = product['main_cam'] / max_main_cam
+      obj['selfie_cam'] = product['selfie_cam'] / max_selfie_cam
+      obj['price'] = min_price / product['price']
+      obj['rank'] = min_rank / product['rank']
+      obj['score'] = (
+          (product['ram'] / max_ram) ** (0.5 * p.performance/100) +
+         (product['cpu'] / max_cpu) ** (0.5 * p.performance/100) +
+         (product['storage'] / max_storage) ** (p.memory/100) +
+         (product['battery'] / max_battery) ** (p.battery/100) +
+         (product['main_cam'] / max_main_cam) ** (0.5 * p.camera/100) +
+         (product['selfie_cam'] / max_selfie_cam) ** (0.5 * p.camera/100) +
+         (min_price / product['price']) ** (p.price/100) +
+         (min_rank / product['rank']) ** (p.reputation/100)
+      )
+      normalized_data.append(obj)
+
+   print(normalized_data[0])
+   # print("Max CPU", max_cpu)
+   for idx,obj in enumerate(data):
+      obj['score'] = normalized_data[idx]['score']
+
+   data = sorted(data, key=lambda x: x['score'])
+   data.reverse()
+   # print("data0", data[0]['cpu'])
    context = {
       'page_title': "Rekomendasi",
-      'products': products
+      'data': data
    }
 
    return render(request, 'rekomendasi.html', context)

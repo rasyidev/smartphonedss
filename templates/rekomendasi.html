@@ -6,18 +6,30 @@
    <thead>
       <tr>
          <td>Nama</td>
-         <td>url</td>
+         <td>RAM</td>
+         <td>CPU</td>
+         <td>Storage</td>
+         <td>Kamera Utama</td>
+         <td>Kamera Depan</td>
          <td>Harga</td>
          <td>Reputasi</td>
+         <td>SCORE</td>
+         <td>url</td>
       </tr>
    </thead>
    <tbody>
-   {% for product in products %}
+   {% for d in data %}
       <tr>
-         <td>{{ product}}</td>
-         <td><a href="{{ product.product_url }}">link</a></td>
-         <td>Rp.{{ product.price }}</td>
-         <td>{{ product.rank }}</td>
+         <td>{{ d.product_name }}</td>
+         <td>{{ d.ram }}</td>
+         <td>{{ d.cpu }}</td>
+         <td>{{ d.storage }}</td>
+         <td>{{ d.main_cam }}</td>
+         <td>{{ d.selfie_cam }}</td>
+         <td>{{ d.price }}</td>
+         <td>{{ d.rank }}</td>
+         <td>{{ d.score }}</td>
+         <td><a href="{{ d.product_url }}">Link Produk</a></td>
       </tr>
    {% endfor %}
    </tbody>
