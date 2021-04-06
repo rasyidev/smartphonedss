@@ -1,6 +1,6 @@
 {% extends 'dashboard.html' %}
 {% load static %}
-{% load dashboard_extras %}
+{% load dss_extras %}
 
 {% block header_extras %}
 <script src="{% static 'vendor/chartjs/Chart.min.js' %}"></script>
@@ -30,6 +30,9 @@
       <div class="card-body">
          <h5 class="card-title text-center">Keranjang Saya</h5>
          <table width="100%" class="mb-5">
+         {% if smartphones|is_empty %}
+            <p>belum ada model smartphone yang ditambahkan</p>
+         {% endif %}
          {% for smartphone in smartphones %}
             <tr>
                <td width="100%">{{ smartphone.name }}</td>
@@ -40,7 +43,7 @@
          {% endfor %}
          </table>
 
-         <a href="{% url 'dashboard:register_preference' %}" class="btn btn-success">Rekomendasi</a>
+         <a href="{% url 'dashboard:rekomendasi' %}" class="btn btn-success">Rekomendasi</a>
       </div>
    </div>
 

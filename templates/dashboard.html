@@ -1,5 +1,5 @@
 {% extends 'index.html' %}
-{% load dashboard_extras %}
+{% load dss_extras %}
 
 {% block navbar_user %}
 <li class="nav-item dropdown">
@@ -42,7 +42,7 @@
 </div>
 {% endif %}
 <div class="container-fluid col-12 text-center d-flex">
-   <div class="row justify-content-center px-3" id="items-container">
+   <div class="row justify-content-center px-3 m-auto" id="items-container">
       {% for smartphone in smartphones %}
       <div class="card col-5 col-sm-3 col-md-2 m-0 p-3">
          <img src="{{ smartphone.img_url }}" class="card-img-top" alt="...">
@@ -71,7 +71,11 @@
             var data = JSON.parse(xhr.responseText)["smartphones"]
             var smartphones = JSON.parse(data)
             if(smartphones.length == 0){
-               itemsContainer.innerHTML = "Data smartphone tidak ditemukan";
+               itemsContainer.innerHTML = `
+               <div class="alert alert-danger alert-dismissible fade show m-auto justify-content-center" role="alert">
+                  <strong>Smartphone tidak ditemukan!</strong> silahkan coba kata kunci lain.
+                  <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+               </div>`;
             }else{
                console.log(smartphones[0])
                text = ""

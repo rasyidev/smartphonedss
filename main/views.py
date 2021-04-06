@@ -226,7 +226,7 @@ def remove_from_cart(request):
       user_id = request.user.id
       cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
       smartphonecart = SmartphoneCart.objects.filter(cart_id=cart.id)
-      smartphone_tobe_removed = SmartphoneCart.objects.get(smartphone_id=smartphone_id)
+      smartphone_tobe_removed = SmartphoneCart.objects.get(smartphone_id=smartphone_id, cart_id=cart.id)
       smartphone_name = Smartphone.objects.get(id=smartphone_id).name
       # print(smartphone_tobe_removed.__dict__)
       smartphone_tobe_removed.delete()
@@ -255,6 +255,7 @@ def rekomendasi(request):
       smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
       obj = {}
       obj['product_name'] = smartphone.name
+      obj['seller'] = product.seller
       obj['ram'] = smartphone.ram
       obj['storage'] = smartphone.storage
       obj['cpu'] = smartphone.cpu

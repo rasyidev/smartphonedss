@@ -15,3 +15,10 @@ def preference_empty(preference):
    # else:
    #    result = False
    return "test"
+
+@register.filter(name='is_empty')
+def is_empty(any_list):
+   empty = False
+   if len(any_list) < 1:
+      empty = True
+   return empty
