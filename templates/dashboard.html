@@ -49,8 +49,7 @@
          <div class="card-body">
             <h5 class="card-title">{{ smartphone.name }}</h5>
             <p class="card-text">RAM {{ smartphone.ram }} GB | Storage {{ smartphone.storage }} GB</p>
-            <a href="{{ smartphone.url }}" class="btn btn-primary">Lihat Detail</a>
-            <a href="{% url 'dashboard:insert_to_cart' %}?smartphone_id={{ smartphone.id }}">Insert To Cart</a>
+            <a class="btn btn-primary" href="{% url 'dashboard:insert_to_cart' %}?smartphone_id={{ smartphone.id }}">Tambahkan ke keranjang</a>
          </div>
       </div>
       {% endfor %}
@@ -85,8 +84,7 @@
                               <div class="card-body">
                                  <h5 class="card-title">${obj.fields.name}</h5>
                                  <p class="card-text">RAM ${obj.fields.ram} GB | Storage ${obj.fields.storage} GB</p>
-                                 <a href="${obj.fields.url}" class="btn btn-primary">Lihat Detail</a>
-                                 <a href="{% url 'dashboard:insert_to_cart' %}?smartphone_id=${obj.pk}">Insert To Cart</a>
+                                 <a class="btn btn-primary" href="{% url 'dashboard:insert_to_cart' %}?smartphone_id=${obj.pk}">Tambahkan ke keranjang</a>
                               </div>
                            </div>`
                })

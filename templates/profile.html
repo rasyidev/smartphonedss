@@ -31,7 +31,10 @@
          <h5 class="card-title text-center">Keranjang Saya</h5>
          <table width="100%" class="mb-5">
          {% if smartphones|is_empty %}
-            <p>belum ada model smartphone yang ditambahkan</p>
+            <div class="alert alert-danger alert-dismissible fade show m-auto justify-content-center" role="alert">
+               <strong>belum ada smartphone yang dipilih!</strong> silahkan pilih <a href="{% url 'dashboard:index' %}">Smartphone</a> terlebih dahulu.
+               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
          {% endif %}
          {% for smartphone in smartphones %}
             <tr>
