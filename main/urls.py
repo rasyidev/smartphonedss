@@ -13,4 +13,7 @@ urlpatterns = [
     path('get_smartphones', views.get_smartphones, name="get_smartphones"),
     path('insert_to_cart', views.insert_to_cart, name="insert_to_cart"),
     path('remove_from_cart', views.remove_from_cart, name="remove_from_cart"),
+    path('cart', views.cart, name="cart"),
+    path('recommendation_result', views.recommendation_result, name="recommendation_result"),
+    path('profile/cart_details', views.cart_details, name="cart_details"),
 ]

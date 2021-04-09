@@ -9,44 +9,32 @@
 {% block contents %}
 {% if preference_empty %}
 <div class="alert alert-danger" role="alert">
-  <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
-  <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
-  <hr>
-  <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi smartphone</a></p>
+   <h4 class="alert-heading">Preferensi Spesifikasi Smartphone Belum Dipilih!</h4>
+   <p>Untuk dapat melakukan proses pencarian smartphone, pengguna memilih preferensi terlebih dahulu</p>
+   <hr>
+   <p class="mb-0">Klik di sini untuk mengisi <a href="{% url 'dashboard:register_preference' %}">preferensi
+         smartphone</a></p>
 </div>
 {% endif %}
 
 {% if not preference_empty %}
-<div class="row col-12 mx-0 d-flex">
-   <div class="card col-xs-12 col-md-6 justify-content-center    m-auto">
+<div class="row col-12 mx-0 p-2 d-flex align-items-stretch">
+   <div class="card col-xs-12 col-md-6">
       <div class="card-body">
          <h5 class="card-title text-center">Preferensi Saya</h5>
          <canvas id="myChart"></canvas>
-            content.</p>
          <a href="{% url 'dashboard:register_preference' %}" class="btn btn-warning">Update preferensi</a>
       </div>
    </div>
-   <div class="card col-md-6 justify-content-center m-auto align-item-top">
+   <div class="card col-md-6">
       <div class="card-body">
-         <h5 class="card-title text-center">Keranjang Saya</h5>
-         <table width="100%" class="mb-5">
-         {% if smartphones|is_empty %}
-            <div class="alert alert-danger alert-dismissible fade show m-auto justify-content-center" role="alert">
-               <strong>belum ada smartphone yang dipilih!</strong> silahkan pilih <a href="{% url 'dashboard:index' %}">Smartphone</a> terlebih dahulu.
-               <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+         <h5 class="card-title text-center">Hasil Rekomendasi untuk Saya</h5>
+         {% for c in cart %} 
+            <div class="row d-flex justify-content-end">
+               <p class="p-0 m-1">Keranjang {{ forloop.counter }}</p>
+               <a href="{% url 'dashboard:cart_details' %}?cart_id={{ c.id }}" class="btn btn-primary">Detail Keranjang {{ forloop.counter }}</a>
             </div>
-         {% endif %}
-         {% for smartphone in smartphones %}
-            <tr>
-               <td width="100%">{{ smartphone.name }}</td>
-               <td>
-                  <a href="{% url 'dashboard:remove_from_cart' %}?smartphone_id={{ smartphone.id }}" class="btn badge btn-danger">Hapus</a>
-               </td>
-            </tr>
          {% endfor %}
-         </table>
-
-         <a href="{% url 'dashboard:rekomendasi' %}" class="btn btn-success">Rekomendasi</a>
       </div>
    </div>
 

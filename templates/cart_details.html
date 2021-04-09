@@ -1,0 +1,47 @@
+{% extends 'dashboard.html' %}
+{% load dss_extras %}
+{% block contents %}
+   <table class="table">
+      <thead>
+         <tr>
+            <td>No.</td>
+            <td>Nama</td>
+            <td>ID Produk</td>
+            <td>Seller</td>
+            <td>RAM</td>
+            <td>CPU</td>
+            <td>Storage</td>
+            <td>Kamera Utama</td>
+            <td>Kamera Depan</td>
+            <td>Harga</td>
+            <td>Reputasi</td>
+            <td>SCORE</td>
+            <td>url</td>
+            <td>Relevansi</td>
+         </tr>
+      </thead>
+      <tbody>
+         {% for p in products %}
+         <input class="visually-hidden" type="text" value="{{ d.product_id }}">
+         <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ p.product_name }}</td>
+            <td>{{ p.product_id }}</td>
+            <td>{{ p.seller }}</td>
+            <td>{{ p.ram|to_int }}</td>
+            <td>{{ p.cpu|to_int }}</td>
+            <td>{{ p.storage|to_int }}</td>
+            <td>{{ p.main_cam|to_int }}</td>
+            <td>{{ p.selfie_cam|to_int }}</td>
+            <td>{{ p.price}}</td>
+            <td>{{ p.rank|to_int }}</td>
+            <td>{{ p.score }}</td>
+            <td><a href="{{ d.product_url }}">Link Produk</a></td>
+            <td>
+               
+            </td>
+         </tr>
+         {% endfor %}
+      </tbody>
+   </table>
+{% endblock contents %}

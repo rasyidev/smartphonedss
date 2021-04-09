@@ -8,34 +8,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{{ page_title }}</title>
   <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap-icons.css' %}">
   {% block header_extras %}{% endblock header_extras %}
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-sm navbar-light bg-light">
-    <div class="container-fluid justify-content-center">
+  <nav class="navbar navbar-expand navbar-light bg-light">
+    <div class="container-fluid">
       <a class="navbar-brand" href="{% url 'dashboard:index' %}">SmartphoneDSS</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+        aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <div class="collapse navbar-collapse d-flex justify-content-end" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
           {% block navbar_user %}
+            <a class="nav-link fw-bold" aria-current="page" href="{% url 'login' %}">Masuk</a>
+            <a class="nav-link" href="{% url 'register' %}">Daftar</a>
           {% endblock navbar_user %}
-        </ul>
+        </div>
       </div>
     </div>
   </nav>
-  <div class="container-fluid col-8 text-center">
-    <h1>{{ page_title }}</h1>
-    <h3>User: {{ user }}</h3>
-  </div>
 
   {% block contents %}
-  <a href="{% url 'login' %}">Login</a>
-  <br>
-  <a href="{% url 'register' %}">Register</a>
   {% endblock contents %}
 
   {% block js_extras %}

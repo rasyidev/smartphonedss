@@ -9,7 +9,7 @@ from . import ahp_logic
 from .models import UserPreference, CustomUser, Smartphone, Product, Cart, SmartphoneCart, ProductRecommendation
 
 # Create your views here.
-# @login_required
+@login_required
 def index(request):
    smartphones = Smartphone.objects.all().order_by('name')
    if request.method == "POST":
@@ -37,11 +37,12 @@ def index(request):
    }
    return  render(request, 'dashboard.html', context)
 
-# @login_required
+@login_required
 def user_logout(request):
    logout(request)
    return redirect('/')
 
+@login_required
 def user_preferences(request):
    user = request.user
    preferences = UserPreference.objects.filter(user_id=user.id, is_choosen=True)[0]
@@ -51,14 +52,15 @@ def user_preferences(request):
    }
    return render(request, 'user-preference.html', context)
 
+@login_required
 def profile(request):
    user = request.user
    preferences = UserPreference.objects.filter(user_id=user.id)
-   cart = Cart.objects.filter(user_id=user.id, do_recommendation=False)[0]
-   smartphone_objects = SmartphoneCart.objects.filter(cart_id=cart.id)
-   smartphones = []
-   for x in smartphone_objects:
-      smartphones.append(Smartphone.objects.get(id=x.smartphone_id))
+   cart = Cart.objects.filter(user_id=user.id)
+   # smartphone_objects = SmartphoneCart.objects.filter(cart_id=cart.id)
+   # smartphones = []
+   # for x in smartphone_objects:
+   #    smartphones.append(Smartphone.objects.get(id=x.smartphone_id))
    preference_empty = None
    if len(preferences) == 0:
       print("Smartphone Preference not registered yet!")
@@ -66,14 +68,16 @@ def profile(request):
    else:
       preference_empty = False
       preferences = preferences[0]
+
    context = {
       'preference_empty': preference_empty,
       'page_title': "User Profile",
       'preferences': preferences,
-      'smartphones': smartphones,
+      'cart': cart,
    }
    return render(request, 'profile.html', context)
 
+@login_required
 def register_preference(request):
    # print(request.user.id)
    # print(UserPreference.objects.all()[0].__dict__)
@@ -115,7 +119,7 @@ def register_preference(request):
          cw = ahp.get_criteria_weight()
          UserPreference.objects.create(user=CustomUser.objects.get(id=request.user.id), performance=cw[0], price=cw[1], camera=cw[2], memory=cw[3], battery=cw[4], reputation=cw[5])
 
-         return redirect('dashboard:profile')
+         return redirect('dashboard:index')
       else:
          print( ahp.get_criteria_weight())
          return redirect('dashboard:register_preference')
@@ -152,6 +156,7 @@ def register_preference(request):
    }
    return render(request, 'register-preference.html', context)
 
+@login_required
 def get_smartphones(request):
    smartphones = Smartphone.objects.all()
    
@@ -170,6 +175,7 @@ def get_smartphones(request):
          
    return JsonResponse(data)
 
+@login_required
 def insert_to_cart(request):
    response = ""
    # if request get data exist
@@ -216,8 +222,10 @@ def insert_to_cart(request):
    else:
       response = "Gagal menambahkan data smartphone"
 
+
    return redirect('dashboard:index')
 
+@login_required
 def remove_from_cart(request):
    response = ""
    # if request get data exist
@@ -231,14 +239,18 @@ def remove_from_cart(request):
       # print(smartphone_tobe_removed.__dict__)
       smartphone_tobe_removed.delete()
       response = f"{smartphone_name} has removed from your cart!"
-      return redirect('dashboard:profile')
+      return redirect('dashboard:cart')
 
    else:
       response = "No data to be removed!"
    return HttpResponse(response)
    # return redirect('dashboard:profile')
 
+@login_required
 def rekomendasi(request):
+   if request.method == "POST":
+      print(request.POST)
+
    user_id = request.user.id
    cart = Cart.objects.filter(user_id=user_id, do_recommendation=False)[0]
    smartphonecart = SmartphoneCart.objects.filter(cart_id=cart.id)
@@ -249,12 +261,12 @@ def rekomendasi(request):
 
    products = Product.objects.filter(smartphone_model_id__in=smartphone_ids)
    p = UserPreference.objects.get(user_id=user_id)
-   print("User preferences:", p.__dict__)
    data = []
    for product in products:
       smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
       obj = {}
       obj['product_name'] = smartphone.name
+      obj['product_id'] = product.id
       obj['seller'] = product.seller
       obj['ram'] = smartphone.ram
       obj['storage'] = smartphone.storage
@@ -281,6 +293,7 @@ def rekomendasi(request):
    for product in data:
       obj = {}
       obj['product_name'] = product['product_name']
+      obj['product_id'] = product['product_id']
       obj['ram'] = product['ram'] / max_ram
       obj['storage'] = product['storage'] / max_storage
       obj['cpu'] = product['cpu'] / max_cpu
@@ -311,7 +324,107 @@ def rekomendasi(request):
    # print("data0", data[0]['cpu'])
    context = {
       'page_title': "Rekomendasi",
-      'data': data
+      'data': data,
+      'top5': data[:5],
+      'topnext15': data[5:20]
    }
 
    return render(request, 'rekomendasi.html', context)
+
+@login_required
+def cart(request):
+   user = request.user
+   smartphones = []
+   preferences = UserPreference.objects.filter(user_id=user.id)
+   if len(Cart.objects.filter(user_id=user.id, do_recommendation=False)) > 0:
+      cart = Cart.objects.filter(user_id=user.id, do_recommendation=False)[0]
+
+      smartphone_objects = SmartphoneCart.objects.filter(cart_id=cart.id)
+      for x in smartphone_objects:
+         smartphones.append(Smartphone.objects.get(id=x.smartphone_id))
+
+   context = {
+       'page_title': "Keranjang Smartphone",
+       'preferences': preferences,
+       'smartphones': smartphones,
+   }
+
+   return render(request, 'cart.html', context)
+
+@login_required
+def recommendation_result(request):
+   user_id = request.user.id
+
+   cart = Cart.objects.filter(user_id = user_id, do_recommendation=False)[0]
+   
+   data = {}
+   if request.method == "POST":
+      data = dict(request.POST)
+
+   del data['csrfmiddlewaretoken']
+   
+   data_keys = list(data.keys())
+
+
+   products = []
+   # len(data_keys)
+   for i in range(0, len(data_keys), 3):
+      is_relevant, product_id, score = data_keys[i:i+3]
+      obj = {}
+      obj['is_relevant'] = bool(int(data[is_relevant][0]))
+      obj['product_id'] = data[product_id][0]
+      obj['score'] = float(data[score][0])
+      products.append(obj)
+   
+   for idx, x in enumerate(products):
+      # print(x, product[x])
+      ProductRecommendation.objects.create(order=idx+1, product_id=x['product_id'], cart_id=cart.id, relevance=x['is_relevant'], score=x['score'])
+   
+   cart.do_recommendation = True
+   cart.save()
+
+
+
+   context = {
+      'cart': cart,
+      'message': "Produk rekomendasi berhasil disimpan."
+   }
+
+   return render(request, 'recommendation_result.html', context)
+
+
+def cart_details(request):
+   if request.method == "GET":
+      cart_id = request.GET['cart_id']
+      user_id = request.user.id
+      cart = Cart.objects.get(id=cart_id)
+      products = []
+      product_recommendations = ProductRecommendation.objects.filter(cart_id=cart_id)
+      for pr in product_recommendations:
+         product = Product.objects.get(id=pr.product_id)
+         smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
+         obj = {}
+         obj['product_name'] = smartphone.name
+         obj['product_id'] = product.id
+         obj['seller'] = product.seller
+         obj['ram'] = smartphone.ram
+         obj['storage'] = smartphone.storage
+         obj['cpu'] = smartphone.cpu
+         obj['battery'] = smartphone.battery
+         obj['main_cam'] = smartphone.main_cam
+         obj['selfie_cam'] = smartphone.selfie_cam
+         obj['price'] = product.price
+         obj['rank'] = product.rank
+         obj['score'] = 0
+         obj['product_url'] = product.product_url
+         obj['relevance'] = pr.relevance
+         products.append(obj)
+
+   # products = serializers.serialize('json', products)
+   context = {
+      'page_title': "Detail Keranjang",
+      'products': products
+   }
+   return render(request, 'cart_details.html', context)
+      
+   #output: cart and its products

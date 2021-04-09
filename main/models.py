@@ -76,9 +76,13 @@ class SmartphoneCart(models.Model):
    cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
    smartphone = models.ForeignKey(Smartphone, on_delete=models.CASCADE)
 
-class Recomendation(models.Model):
-   smartphone_cart = models.ForeignKey(SmartphoneCart, on_delete=models.CASCADE)
+# class Recomendation(models.Model):
+#    smartphone_cart = models.ForeignKey(SmartphoneCart, on_delete=models.CASCADE)
+#    product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
 class ProductRecommendation(models.Model):
-   recommendation = models.ForeignKey(Recomendation, on_delete=models.CASCADE)
+   order = models.IntegerField()
+   cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+   relevance = models.BooleanField()
+   score = models.FloatField()

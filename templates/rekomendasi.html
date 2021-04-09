@@ -1,39 +1,126 @@
 {% extends 'dashboard.html' %}
 {% load static %}
+{% load dss_extras %}
 
 {% block contents %}
-<table class="table">
-   <thead>
-      <tr>
-         <td>Nama</td>
-         <td>Seller</td>
-         <td>RAM</td>
-         <td>CPU</td>
-         <td>Storage</td>
-         <td>Kamera Utama</td>
-         <td>Kamera Depan</td>
-         <td>Harga</td>
-         <td>Reputasi</td>
-         <td>SCORE</td>
-         <td>url</td>
-      </tr>
-   </thead>
-   <tbody>
-   {% for d in data %}
-      <tr>
-         <td>{{ d.product_name }}</td>
-         <td>{{ d.seller }}</td>
-         <td>{{ d.ram }}</td>
-         <td>{{ d.cpu }}</td>
-         <td>{{ d.storage }}</td>
-         <td>{{ d.main_cam }}</td>
-         <td>{{ d.selfie_cam }}</td>
-         <td>{{ d.price }}</td>
-         <td>{{ d.rank }}</td>
-         <td>{{ d.score }}</td>
-         <td><a href="{{ d.product_url }}">Link Produk</a></td>
-      </tr>
-   {% endfor %}
-   </tbody>
-</table>
+<form action="{% url 'dashboard:recommendation_result' %}" method="POST">
+   {% csrf_token %}
+   <table class="table">
+      <thead>
+         <tr>
+            <td>No.</td>
+            <td>Nama</td>
+            <td>ID Produk</td>
+            <td>Seller</td>
+            <td>RAM</td>
+            <td>CPU</td>
+            <td>Storage</td>
+            <td>Kamera Utama</td>
+            <td>Kamera Depan</td>
+            <td>Harga</td>
+            <td>Reputasi</td>
+            <td>Score</td>
+            <td>url</td>
+            <td>Relevan di 5 Terbaik?</td>
+         </tr>
+      </thead>
+      <tbody>
+         {% for d in top5 %}
+         <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ d.product_name }}</td>
+            <td>{{d.product_id}}</td>
+            <td>{{ d.seller }}</td>
+            <td>{{ d.ram|to_int }}</td>
+            <td>{{ d.cpu|to_int }}</td>
+            <td>{{ d.storage|to_int }}</td>
+            <td>{{ d.main_cam|to_int }}</td>
+            <td>{{ d.selfie_cam|to_int }}</td>
+            <td>{{ d.price}}</td>
+            <td>{{ d.rank|to_int }}</td>
+            <td>{{ d.score|to_int }}</td>
+            <td><a href="{{ d.product_url }}">Link Produk</a></td>
+            <td>
+               <div class="form-check">
+                  <input class="form-check-input" value="1" type="radio" name="is-{{ forloop.counter }}-relevant"
+                     id="yes" checked>
+                  <label class="form-check-label" for="yes">
+                     Ya
+                  </label>
+               </div>
+               <div class="form-check">
+                  <input class="form-check-input" value="0" type="radio" name="is-{{ forloop.counter }}-relevant"
+                     id="no">
+                  <label class="form-check-label" for="no">
+                     Tidak
+                  </label>
+               </div>
+               <input type="text" class="visually-hidden" name="product-id-{{ forloop.counter }}" value="{{ d.product_id }}">
+               <input class="visually-hidden" type="text" name="score-{{ forloop.counter }}" value="{{ d.score }}">
+            </td>
+         </tr>
+         {% endfor %}
+      </tbody>
+   </table>
+
+
+   <table class="table">
+      <thead>
+         <tr class="">
+            <td>No.</td>
+            <td>Nama</td>
+            <td>ID Produk</td>
+            <td>Seller</td>
+            <td>RAM</td>
+            <td>CPU</td>
+            <td>Storage</td>
+            <td>Kamera Utama</td>
+            <td>Kamera Depan</td>
+            <td>Harga</td>
+            <td>Reputasi</td>
+            <td>Score</td>
+            <td>url</td>
+             <td>Relevan di 6 - 20  Terbaik?</td>
+         </tr>
+      </thead>
+      <tbody>
+         {% for d in topnext15 %}
+         <tr>
+            <td>{{ forloop.counter|plus:5 }}</td>
+            <td>{{ d.product_name }}</td>
+            <td>{{d.product_id}}</td>
+            <td>{{ d.seller }}</td>
+            <td>{{ d.ram|to_int }}</td>
+            <td>{{ d.cpu|to_int }}</td>
+            <td>{{ d.storage|to_int }}</td>
+            <td>{{ d.main_cam|to_int }}</td>
+            <td>{{ d.selfie_cam|to_int }}</td>
+            <td>{{ d.price}}</td>
+            <td>{{ d.rank|to_int }}</td>
+            <td>{{ d.score|to_int }}</td>
+            <td><a href="{{ d.product_url }}">Link Produk</a></td>
+            <td>
+               <div class="form-check">
+                  <input class="form-check-input" value="1" type="radio" name="is-{{ forloop.counter|plus:5 }}-relevant"
+                     id="yes" checked>
+                  <label class="form-check-label" for="yes">
+                     Ya
+                  </label>
+               </div>
+               <div class="form-check">
+                  <input class="form-check-input" value="0" type="radio" name="is-{{ forloop.counter|plus:5 }}-relevant"
+                     id="no">
+                  <label class="form-check-label" for="no">
+                     Tidak
+                  </label>
+                  <input type="text" class="visually-hidden" name="product-id-{{ forloop.counter|plus:5 }}" value="{{ d.product_id }}">
+                  <input class="visually-hidden" type="text" name="score-{{ forloop.counter|plus:5 }}" value="{{ d.score }}">
+               </div>
+            </td>
+         </tr>
+         {% endfor %}
+      </tbody>
+   </table>
+   <button type="submit" class="btn btn-primary">Submit</button>
+</form>
 {% endblock contents %}
