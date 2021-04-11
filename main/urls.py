@@ -16,4 +16,5 @@ urlpatterns = [
     path('cart', views.cart, name="cart"),
     path('recommendation_result', views.recommendation_result, name="recommendation_result"),
     path('profile/cart_details', views.cart_details, name="cart_details"),
+    path('profile/default_preference', views.default_preference, name="default_preference"),
 ]

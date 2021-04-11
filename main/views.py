@@ -428,3 +428,20 @@ def cart_details(request):
    return render(request, 'cart_details.html', context)
       
    #output: cart and its products
+
+def default_preference(request):
+   user_id = request.user.id
+   p = UserPreference.objects.get(user_id=user_id)
+   p.performance = 6.67
+   p.price = 6.67
+   p.camera = 6.67
+   p.memory = 6.67
+   p.battery = 6.67
+   p.reputation = 6.67
+   p.is_choosen = True
+   p.save()
+
+   context = {
+      'page_title': "Preferensi Standar",
+   }
+   return render(request, 'default_preference.html')
