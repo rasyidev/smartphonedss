@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.core import serializers
 from django.db.models.functions import Lower
+import json
 
 from . import ahp_logic
 from .models import UserPreference, CustomUser, Smartphone, Product, Cart, SmartphoneCart, ProductRecommendation
@@ -265,6 +266,7 @@ def rekomendasi(request):
    for product in products:
       smartphone = Smartphone.objects.get(id=product.smartphone_model_id)
       obj = {}
+      obj['smartphone_id'] = smartphone.id
       obj['product_name'] = smartphone.name
       obj['product_id'] = product.id
       obj['seller'] = product.seller
@@ -321,12 +323,44 @@ def rekomendasi(request):
 
    data = sorted(data, key=lambda x: x['score'])
    data.reverse()
+
+
+
+   # TOP 20
+   ids = set([x['smartphone_id'] for x in data])
+   each_model_amount = 20 // len(ids)
+   left_amount = 20 - each_model_amount * len(ids)
+
+   obj = {}
+   for id in ids:
+      obj[str(id)] = []
+
+   for x in data:
+      for id in ids:
+         if x['smartphone_id'] == id:
+               obj[str(id)].append(x)
+
+   top_20 = []
+   keys = list(obj.keys())
+   first_key = keys[0]
+   if left_amount > 0:
+      top_20 += obj[first_key][:(each_model_amount + left_amount)]
+   else:
+      top_20 += obj[k][:each_model_amount]
+   for k in keys[1:]:
+      top_20 += obj[k][:each_model_amount]
+
+   # sort by score
+   top_20 = sorted(top_20, key=lambda x: x['score'])
+   top_20.reverse()
+   # with open('extracted_data.json', 'w') as f:
+   #    json.dump(data, f)
    # print("data0", data[0]['cpu'])
    context = {
       'page_title': "Rekomendasi",
       'data': data,
-      'top5': data[:5],
-      'topnext15': data[5:20]
+      'top5': top_20[:5],
+      'topnext15': top_20[5:20]
    }
 
    return render(request, 'rekomendasi.html', context)
